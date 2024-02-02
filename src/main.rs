@@ -6,10 +6,18 @@ mod consts;
 use consts::*;
 
 fn main() -> Result<(), eframe::Error> {
+    let viewport = ViewportBuilder::default()
+        .with_inner_size([320.0, 240.0])
+        // .with_always_on_top()
+        .with_decorations(false)
+        .with_transparent(true);
+
     let options = eframe::NativeOptions {
-        viewport: ViewportBuilder::default().with_inner_size([320.0, 240.0]),
+        viewport,
+        vsync: true,
         ..Default::default()
     };
+
     eframe::run_native(
         format!("{} Editor", APP_NAME_STR).as_str(),
         options,
