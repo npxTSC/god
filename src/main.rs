@@ -1,4 +1,5 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
+// hide console window on Windows in release
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use eframe::egui::*;
 
@@ -18,11 +19,7 @@ fn main() -> Result<(), eframe::Error> {
         ..Default::default()
     };
 
-    eframe::run_native(
-        format!("{} Editor", APP_NAME_STR).as_str(),
-        options,
-        Box::new(|_cc| Box::<MyApp>::default()),
-    )
+    eframe::run_native("god", options, Box::new(|_cc| Box::<MyApp>::default()))
 }
 
 struct MyApp {
@@ -65,7 +62,7 @@ impl eframe::App for MyApp {
             ..Visuals::dark()
         });
 
-        let titlebar_text = format!("{} v{}", APP_NAME_STR, APP_VERSION);
+        let titlebar_text = format!("god v{}", APP_VERSION);
         custom_window_frame(ctx, &titlebar_text, |ui| {
             ui.heading(&titlebar_text);
             ui.horizontal(|ui| {

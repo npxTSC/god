@@ -1,7 +1,6 @@
 use eframe::epaint::Color32;
 
 pub const TITLEBAR_HEIGHT: f32 = 24.0;
-pub const APP_NAME_STR: &str = "`god`";
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub struct ThemeColors;
