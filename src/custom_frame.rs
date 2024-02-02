@@ -29,32 +29,8 @@ pub fn set_purple_theme(ctx: &Context) {
             ..style::Widgets::dark()
         },
 
-        // dark_mode: todo!(),
-        // override_text_color: todo!(),
-        // selection: todo!(),
-        // code_bg_color: todo!(),
-        // warn_fg_color: todo!(),
-        // error_fg_color: todo!(),
-        // window_rounding: todo!(),
-        // window_shadow: todo!(),
         window_fill: BG_PURPLE_DEEP,
         window_stroke: bg_stroke,
-        // window_highlight_topmost: todo!(),
-        // menu_rounding: todo!(),
-        // panel_fill: todo!(),
-        // popup_shadow: todo!(),
-        // text_cursor: todo!(),
-        // text_cursor_preview: todo!(),
-        // clip_rect_margin: todo!(),
-        // button_frame: todo!(),
-        // collapsing_header_frame: todo!(),
-        // indent_has_left_vline: todo!(),
-        // striped: todo!(),
-        // slider_trailing_fill: todo!(),
-        // handle_shape: todo!(),
-        // interact_cursor: todo!(),
-        // image_loading_spinners: todo!(),
-        // numeric_color_space: todo!(),
         ..Visuals::dark()
     });
 }
