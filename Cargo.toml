@@ -10,4 +10,14 @@ keywords = ["osint", "dossier"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-eframe = "0.25.0"
+eframe = { version = "0.25.0", optional = true }
+
+[features]
+gui = ["dep:eframe"]
+
+[[bin]]
+name = "god-gui"
+required-features = ["gui"]
+
+[[bin]]
+name = "god-cli"

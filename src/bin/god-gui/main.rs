@@ -1,12 +1,18 @@
+// hide console window on Windows in release
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#![feature(lazy_cell)]
+
 use std::sync::LazyLock;
 
 use eframe::egui::*;
 
+mod gui_consts;
+
 mod custom_frame;
 use custom_frame::*;
 
-use crate::consts::APP_VERSION;
-static TITLE_TEXT: LazyLock<String> = LazyLock::new(|| format!("god v{}", APP_VERSION));
+const APP_VER: &str = env!("CARGO_PKG_VERSION");
+static TITLE_TEXT: LazyLock<String> = LazyLock::new(|| format!("god v{}", APP_VER));
 
 pub fn main() -> Result<(), eframe::Error> {
     let options = eframe::NativeOptions {

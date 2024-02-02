@@ -1,5 +1,3 @@
-pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
-
 pub mod theme_colors {
     use eframe::epaint::Color32;
     pub const BG_PURPLE: Color32 = Color32::from_rgb(79, 0, 148);

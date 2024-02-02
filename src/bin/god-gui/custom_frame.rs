@@ -4,7 +4,7 @@
 use eframe::egui::*;
 
 pub fn set_purple_theme(ctx: &Context) {
-    use crate::consts::theme_colors::*;
+    use super::gui_consts::theme_colors::*;
 
     let bg_stroke = Stroke::new(2.0, BG_PURPLE);
 
