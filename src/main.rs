@@ -8,7 +8,7 @@ use consts::*;
 
 fn main() -> Result<(), eframe::Error> {
     let viewport = ViewportBuilder::default()
-        .with_inner_size([320.0, 240.0])
+        .with_inner_size([640.0, 480.0])
         // .with_always_on_top()
         .with_decorations(false)
         .with_transparent(true);
@@ -24,14 +24,12 @@ fn main() -> Result<(), eframe::Error> {
 
 struct MyApp {
     name: String,
-    age: u32,
 }
 
 impl Default for MyApp {
     fn default() -> Self {
         Self {
             name: "Arthur".to_owned(),
-            age: 42,
         }
     }
 }
@@ -68,17 +66,12 @@ impl eframe::App for MyApp {
 
         let titlebar_text = format!("god v{}", APP_VERSION);
         custom_window_frame(ctx, &titlebar_text, |ui| {
-            ui.heading(&titlebar_text);
             ui.horizontal(|ui| {
                 let name_label = ui.label("Your name: ");
                 ui.text_edit_singleline(&mut self.name)
                     .labelled_by(name_label.id);
             });
-            ui.add(Slider::new(&mut self.age, 0..=120).text("age"));
-            if ui.button("Increment").clicked() {
-                self.age += 1;
-            }
-            ui.label(format!("Hello '{}', age {}", self.name, self.age));
+            ui.label(format!("Hello '{}'", self.name));
         });
     }
 }
@@ -107,7 +100,7 @@ fn custom_window_frame(ctx: &Context, title: &str, add_contents: impl FnOnce(&mu
                 text_color,
             );
 
-            // Paint the line under the title:
+            // // Paint the line under the title:
             painter.line_segment(
                 [
                     rect.left_top() + vec2(2.0, TITLEBAR_HEIGHT),
@@ -126,6 +119,7 @@ fn custom_window_frame(ctx: &Context, title: &str, add_contents: impl FnOnce(&mu
             );
 
             if close_button.clicked() {
+                println!("Closing");
                 ctx.send_viewport_cmd(ViewportCommand::Close);
             }
 
@@ -135,6 +129,7 @@ fn custom_window_frame(ctx: &Context, title: &str, add_contents: impl FnOnce(&mu
                 rect.max.y = rect.min.y + TITLEBAR_HEIGHT;
                 rect
             };
+
             let title_bar_response =
                 ui.interact(title_bar_rect, Id::new("title_bar"), Sense::click());
             if title_bar_response.is_pointer_button_down_on() {
