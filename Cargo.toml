@@ -10,3 +10,4 @@ keywords = ["osint", "dossier"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+eframe = "0.25.0"
