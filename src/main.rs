@@ -37,6 +37,10 @@ impl Default for MyApp {
 }
 
 impl eframe::App for MyApp {
+    fn clear_color(&self, _visuals: &Visuals) -> [f32; 4] {
+        [0.0; 4]
+    }
+
     fn update(&mut self, ctx: &Context, _frame: &mut eframe::Frame) {
         ctx.set_visuals(Visuals {
             resize_corner_size: 4.0,
