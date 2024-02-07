@@ -8,7 +8,7 @@
 #![allow(unused)]
 
 // use headless_chrome::protocol::cdp::Page;
-use headless_chrome::Browser;
+use headless_chrome::{Browser, LaunchOptionsBuilder};
 
 use anyhow::Result;
 
@@ -17,8 +17,14 @@ mod services;
 
 pub use persistent::{get_datafile, read_datafile};
 
+const HEADLESS_MODE: bool = false;
+
 pub fn _browse_wikipedia() -> Result<()> {
-    let browser = Browser::default()?;
+    // set launch options
+    let mut lops = LaunchOptionsBuilder::default();
+    lops.headless(HEADLESS_MODE);
+
+    let browser = Browser::new(lops.build()?)?;
     let tab = browser.new_tab()?;
 
     tab.navigate_to("https://www.wikipedia.org")?;
