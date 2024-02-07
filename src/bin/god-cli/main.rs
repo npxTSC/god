@@ -18,5 +18,6 @@ pub struct Args {
 
 fn main() {
     let args = Args::parse();
-    let _datafile = god::get_datafile(args.dotfile.as_deref());
+    let datafile = god::get_datafile(args.dotfile.as_deref());
+    let datafile = god::read_datafile(&datafile).unwrap();
 }
