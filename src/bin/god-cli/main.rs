@@ -11,12 +11,12 @@ pub struct Args {
     /// the username to investigate
     user: Option<String>,
 
-    /// the persistent data file
+    /// the persistent data file (defaults to ~/.god-data)
     #[arg(short, long)]
     dotfile: Option<PathBuf>,
 }
 
 fn main() {
     let args = Args::parse();
-    god::hello().unwrap();
+    let _datafile = god::get_datafile(args.dotfile.as_deref());
 }
