@@ -20,11 +20,7 @@ pub use persistent::{get_datafile, read_datafile};
 const HEADLESS_MODE: bool = false;
 
 pub fn _browse_wikipedia() -> Result<()> {
-    // set launch options
-    let mut lops = LaunchOptionsBuilder::default();
-    lops.headless(HEADLESS_MODE);
-
-    let browser = Browser::new(lops.build()?)?;
+    let browser = new_browser(HEADLESS_MODE)?;
     let tab = browser.new_tab()?;
 
     tab.navigate_to("https://www.wikipedia.org")?;
@@ -35,4 +31,12 @@ pub fn _browse_wikipedia() -> Result<()> {
     assert!(tab.get_url().ends_with("WebKit"));
 
     Ok(())
+}
+
+pub fn new_browser(headless: bool) -> Result<Browser> {
+    // launch options
+    let mut lops = LaunchOptionsBuilder::default();
+    let lops = lops.headless(headless).build()?;
+
+    Browser::new(lops)
 }
