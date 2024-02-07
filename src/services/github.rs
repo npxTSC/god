@@ -34,7 +34,14 @@ mod tests {
 
     #[test]
     fn test_primeagen_github() -> Result<()> {
-        let browser = crate::new_browser(false)?;
+        let state = State {
+            chromium: None,
+            headless: true,
+            username: "ThePrimeagen".to_string(),
+            accounts: HashMap::new(),
+        };
+
+        let browser = crate::new_browser(&state)?;
         let tab = browser.new_tab()?;
 
         let aliases = GitHub::find_aliases(tab, "ThePrimeagen");

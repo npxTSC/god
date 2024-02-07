@@ -10,7 +10,13 @@ use crate::services::Service;
 const DATAFILE_NAME: &str = ".god-data";
 
 #[derive(Serialize, Deserialize)]
-pub struct PersistentData {
+pub struct State {
+    /// custom chromium binary path
+    pub chromium: Option<PathBuf>,
+
+    /// should the browser be headless?
+    pub headless: bool,
+
     /// the username of the current target...
     pub username: String,
 
@@ -18,13 +24,13 @@ pub struct PersistentData {
     pub accounts: HashMap<String, Vec<String>>,
 }
 
-pub fn read_datafile(path: &Path) -> Result<PersistentData> {
+pub fn read_datafile(path: &Path) -> Result<State> {
     let data = fs::read_to_string(path)?;
-    let data: PersistentData = toml::from_str(&data)?;
+    let data: State = toml::from_str(&data)?;
     Ok(data)
 }
 
-pub fn write_datafile(path: &Path, data: &PersistentData) -> Result<()> {
+pub fn write_datafile(path: &Path, data: &State) -> Result<()> {
     let data = toml::to_string(data)?;
     fs::write(path, data)?;
     Ok(())

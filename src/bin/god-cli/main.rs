@@ -14,10 +14,17 @@ pub struct Args {
     /// the persistent data file (defaults to ~/.god-data)
     #[arg(short, long)]
     dotfile: Option<PathBuf>,
+
+    /// path for a custom chromium binary
+    #[arg(short, long)]
+    chromium: Option<PathBuf>,
 }
 
 fn main() {
     let args = Args::parse();
-    let datafile = god::get_datafile(args.dotfile.as_deref());
-    let datafile = god::read_datafile(&datafile).unwrap();
+
+    let state = god::get_datafile(args.dotfile.as_deref());
+    let state = god::read_datafile(&state).unwrap();
+
+    let _browser = god::new_browser(&state).unwrap();
 }

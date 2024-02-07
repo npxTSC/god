@@ -6,7 +6,11 @@
 /// submodules for each service will prob use these
 mod prelude {
     pub use super::Service;
+    pub use crate::State;
+
     pub use headless_chrome::Tab;
+
+    pub use std::collections::HashMap;
     pub use std::sync::Arc;
 }
 

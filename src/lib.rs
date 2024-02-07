@@ -12,15 +12,13 @@ use headless_chrome::{Browser, LaunchOptionsBuilder};
 
 use anyhow::Result;
 
-mod persistent;
 mod services;
+mod stateful;
 
-pub use persistent::{get_datafile, read_datafile};
+pub use stateful::{get_datafile, read_datafile, State};
 
-const HEADLESS_MODE: bool = false;
-
-pub fn _browse_wikipedia() -> Result<()> {
-    let browser = new_browser(HEADLESS_MODE)?;
+pub fn _browse_wikipedia(state: &State) -> Result<()> {
+    let browser = new_browser(state)?;
     let tab = browser.new_tab()?;
 
     tab.navigate_to("https://www.wikipedia.org")?;
@@ -33,10 +31,14 @@ pub fn _browse_wikipedia() -> Result<()> {
     Ok(())
 }
 
-pub fn new_browser(headless: bool) -> Result<Browser> {
+pub fn new_browser(state: &State) -> Result<Browser> {
     // launch options
     let mut lops = LaunchOptionsBuilder::default();
-    let lops = lops.headless(headless).build()?;
+
+    lops.headless(state.headless);
+    lops.path(state.chromium.clone());
+
+    let lops = lops.build()?;
 
     Browser::new(lops)
 }
