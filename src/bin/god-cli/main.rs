@@ -1,3 +1,5 @@
+use god;
+
 fn main() {
-    println!("Hello, world!");
+    god::hello().unwrap();
 }

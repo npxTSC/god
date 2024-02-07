@@ -10,7 +10,9 @@ keywords = ["osint", "dossier"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1.0.79"
 eframe = { version = "0.25.0", optional = true }
+headless_chrome = { version = "1.0.9", feature = ["fetch"] }
 
 [features]
 gui = ["dep:eframe"]
