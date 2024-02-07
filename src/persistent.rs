@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::service::Service;
+use crate::services::Service;
 
 const DATAFILE_NAME: &str = ".god-data";
 
@@ -15,7 +15,7 @@ pub struct PersistentData {
     pub username: String,
 
     /// map of services to list of usernames
-    pub accounts: HashMap<Service, Vec<String>>,
+    pub accounts: HashMap<String, Vec<String>>,
 }
 
 pub fn read_datafile(path: &Path) -> Result<PersistentData> {
@@ -34,10 +34,9 @@ pub fn write_datafile(path: &Path, data: &PersistentData) -> Result<()> {
 pub fn get_datafile(path: Option<&Path>) -> PathBuf {
     match path {
         Some(path) => path.to_owned(),
-        None => {
-            use dirs::home_dir;
-            let home = home_dir().expect("No home directory. Seriously?");
-            home.join(DATAFILE_NAME)
-        }
+
+        None => dirs::home_dir()
+            .expect("No home directory. Seriously?")
+            .join(DATAFILE_NAME),
     }
 }

@@ -13,7 +13,7 @@ use headless_chrome::Browser;
 use anyhow::Result;
 
 mod persistent;
-mod service;
+mod services;
 
 pub use persistent::{get_datafile, read_datafile};
 
