@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fs;
 use std::path::{Path, PathBuf};
 
 use anyhow::Result;
@@ -9,27 +10,23 @@ use crate::service::Service;
 const DATAFILE_NAME: &str = ".god-data";
 
 #[derive(Serialize, Deserialize)]
-pub struct Account {
-    pub name: String,
-    pub service: Service,
-}
-
-#[derive(Serialize, Deserialize)]
 pub struct PersistentData {
+    /// the username of the current target...
     pub username: String,
-    pub accounts: HashMap<Service, Account>,
-    pub possible_aliases: Vec<String>,
+
+    /// map of services to list of usernames
+    pub accounts: HashMap<Service, Vec<String>>,
 }
 
 pub fn read_datafile(path: &Path) -> Result<PersistentData> {
-    let data = std::fs::read_to_string(path)?;
+    let data = fs::read_to_string(path)?;
     let data: PersistentData = toml::from_str(&data)?;
     Ok(data)
 }
 
 pub fn write_datafile(path: &Path, data: &PersistentData) -> Result<()> {
     let data = toml::to_string(data)?;
-    std::fs::write(path, data)?;
+    fs::write(path, data)?;
     Ok(())
 }
 
