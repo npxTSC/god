@@ -9,25 +9,35 @@ use crate::services::Service;
 
 const DATAFILE_NAME: &str = ".god-data";
 
-#[derive(Serialize, Deserialize)]
-pub struct State {
+#[derive(Default, Serialize, Deserialize)]
+pub struct Configs {
     /// custom chromium binary path
     pub chromium: Option<PathBuf>,
 
     /// should the browser be headless?
     pub headless: bool,
+}
 
+#[derive(Serialize, Deserialize)]
+pub struct State {
     /// the username of the current target...
     pub username: String,
 
     /// map of services to list of usernames
-    pub accounts: HashMap<String, Vec<String>>,
+    pub accounts: HashMap<String, Vec<Scraped>>,
 }
 
-pub fn read_datafile(path: &Path) -> Result<State> {
-    let data = fs::read_to_string(path)?;
-    let data: State = toml::from_str(&data)?;
-    Ok(data)
+#[derive(Serialize, Deserialize)]
+pub enum Scraped {
+    Username(String),
+    Email(String),
+}
+
+pub fn read_datafile(path: &Path) -> Configs {
+    let data = fs::read_to_string(path);
+
+    data.map(|s| toml::from_str(&s).expect("Issues opening the state file..."))
+        .unwrap_or_default()
 }
 
 pub fn write_datafile(path: &Path, data: &State) -> Result<()> {

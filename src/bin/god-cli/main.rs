@@ -24,7 +24,7 @@ fn main() {
     let args = Args::parse();
 
     let state = god::get_datafile(args.dotfile.as_deref());
-    let state = god::read_datafile(&state).unwrap();
+    let state = god::read_datafile(&state);
 
     let _browser = god::new_browser(&state).unwrap();
 }

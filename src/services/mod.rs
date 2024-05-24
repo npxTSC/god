@@ -4,17 +4,7 @@
 //!
 
 /// submodules for each service will prob use these
-mod prelude {
-    pub use super::Service;
-    pub use crate::State;
-
-    pub use headless_chrome::Tab;
-
-    pub use std::collections::HashMap;
-    pub use std::sync::Arc;
-}
-
-use prelude::*;
+use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 
 pub mod github;
@@ -25,5 +15,5 @@ pub trait Service {
 
     fn username_exists(tab: Arc<Tab>, user: &str) -> bool;
 
-    fn find_aliases(tab: Arc<Tab>, user: &str) -> Vec<String>;
+    fn scan(tab: Arc<Tab>, user: &str) -> Vec<Scraped>;
 }

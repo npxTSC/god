@@ -6,19 +6,31 @@
 //!
 
 #![allow(unused)]
+#![feature(try_blocks)]
 
 // use headless_chrome::protocol::cdp::Page;
 use headless_chrome::{Browser, LaunchOptionsBuilder};
 
-use anyhow::Result;
-
+use crate::prelude::*;
 mod services;
 mod stateful;
 
 pub use stateful::{get_datafile, read_datafile, State};
 
-pub fn _browse_wikipedia(state: &State) -> Result<()> {
-    let browser = new_browser(state)?;
+mod prelude {
+    pub use crate::services::Service;
+    pub use crate::stateful::{Configs, Scraped};
+    pub use crate::State;
+
+    pub use anyhow::Result;
+    pub use headless_chrome::Tab;
+
+    pub use std::collections::HashMap;
+    pub use std::sync::Arc;
+}
+
+pub fn _browse_wikipedia(conf: &Configs) -> Result<()> {
+    let browser = new_browser(conf)?;
     let tab = browser.new_tab()?;
 
     tab.navigate_to("https://www.wikipedia.org")?;
@@ -31,12 +43,12 @@ pub fn _browse_wikipedia(state: &State) -> Result<()> {
     Ok(())
 }
 
-pub fn new_browser(state: &State) -> Result<Browser> {
+pub fn new_browser(conf: &Configs) -> Result<Browser> {
     // launch options
     let mut lops = LaunchOptionsBuilder::default();
 
-    lops.headless(state.headless);
-    lops.path(state.chromium.clone());
+    lops.headless(conf.headless);
+    lops.path(conf.chromium.clone());
 
     let lops = lops.build()?;
 

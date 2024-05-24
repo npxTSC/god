@@ -1,11 +1,6 @@
-use super::prelude::*;
-pub struct GitHub;
+use crate::prelude::*;
 
-impl GitHub {
-    fn get_profile_links(tab: Arc<Tab>, user: &str) -> Vec<String> {
-        todo!()
-    }
-}
+pub struct GitHub;
 
 impl Service for GitHub {
     fn srv_name() -> &'static str {
@@ -16,8 +11,22 @@ impl Service for GitHub {
         todo!()
     }
 
-    fn find_aliases(tab: Arc<Tab>, user: &str) -> Vec<String> {
-        todo!()
+    fn scan(tab: Arc<Tab>, user: &str) -> Vec<Scraped> {
+        let res = vec![];
+
+        let _: Result<_> = try {
+            tab.navigate_to(&format!("https://github.com/{}", user))?;
+            tab.wait_until_navigated();
+
+            if let Ok(email) = tab.find_element("[itemprop=email]") {
+                let email = email.get_content().unwrap();
+                println!("found email! {:?}", email);
+            } else {
+                println!("no email found!");
+            }
+        };
+
+        res
     }
 }
 
@@ -34,19 +43,15 @@ mod tests {
 
     #[test]
     fn test_primeagen_github() -> Result<()> {
-        let state = State {
+        let browser = crate::new_browser(&Configs {
             chromium: None,
             headless: true,
-            username: "ThePrimeagen".to_string(),
-            accounts: HashMap::new(),
-        };
-
-        let browser = crate::new_browser(&state)?;
+        })?;
         let tab = browser.new_tab()?;
 
-        let aliases = GitHub::find_aliases(tab, "ThePrimeagen");
+        let aliases = GitHub::scan(tab, "ThePrimeagen");
 
-        // should also find `ThePrimeTimeagen` (youtube link)
+        // TODO should find `ThePrimeTimeagen` (youtube link)
 
         Ok(())
     }
