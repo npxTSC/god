@@ -15,5 +15,13 @@ pub trait Service {
 
     fn username_exists(tab: Arc<Tab>, user: &str) -> bool;
 
-    fn scan(tab: Arc<Tab>, user: &str) -> Vec<Scraped>;
+    fn scan(tab: &mut Browser, user: &str) -> Vec<Scraped>;
+}
+
+pub fn scan_all(browser: &mut Browser, user: &str) -> HashMap<String, Vec<Scraped>> {
+    let mut res = HashMap::new();
+
+    res.insert("GitHub".to_string(), github::GitHub::scan(browser, user));
+
+    res
 }

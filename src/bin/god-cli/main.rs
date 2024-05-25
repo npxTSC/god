@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use clap::Parser;
-use god;
+use god::{self, Configs};
 
 #[derive(Parser, Debug)]
 #[command(arg_required_else_help(true))]
@@ -11,20 +11,22 @@ pub struct Args {
     /// the username to investigate
     user: Option<String>,
 
-    /// the persistent data file (defaults to ~/.god-data)
-    #[arg(short, long)]
-    dotfile: Option<PathBuf>,
-
     /// path for a custom chromium binary
     #[arg(short, long)]
     chromium: Option<PathBuf>,
+
+    /// should the browser be visible?
+    #[arg(short, long, action)]
+    visible: bool,
 }
 
 fn main() {
     let args = Args::parse();
 
-    let state = god::get_datafile(args.dotfile.as_deref());
-    let state = god::read_datafile(&state);
+    let conf = Configs {
+        chromium: args.chromium,
+        headless: args.visible,
+    };
 
-    let _browser = god::new_browser(&state).unwrap();
+    let _browser = god::new_browser(&conf).unwrap();
 }

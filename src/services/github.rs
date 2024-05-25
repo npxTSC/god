@@ -11,7 +11,8 @@ impl Service for GitHub {
         todo!()
     }
 
-    fn scan(tab: Arc<Tab>, user: &str) -> Vec<Scraped> {
+    fn scan(browser: &mut Browser, user: &str) -> Vec<Scraped> {
+        let tab = browser.new_tab().unwrap();
         let res = vec![];
 
         let _: Result<_> = try {
@@ -43,13 +44,12 @@ mod tests {
 
     #[test]
     fn test_primeagen_github() -> Result<()> {
-        let browser = crate::new_browser(&Configs {
+        let mut browser = crate::new_browser(&Configs {
             chromium: None,
             headless: true,
         })?;
-        let tab = browser.new_tab()?;
 
-        let aliases = GitHub::scan(tab, "ThePrimeagen");
+        let aliases = GitHub::scan(&mut browser, "ThePrimeagen");
 
         // TODO should find `ThePrimeTimeagen` (youtube link)
 

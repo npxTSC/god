@@ -12,18 +12,18 @@
 use headless_chrome::{Browser, LaunchOptionsBuilder};
 
 use crate::prelude::*;
+mod configs;
 mod services;
-mod stateful;
 
-pub use stateful::{get_datafile, read_datafile, State};
+pub use configs::{Configs, State};
 
 mod prelude {
+    pub use crate::configs::{Configs, Scraped};
     pub use crate::services::Service;
-    pub use crate::stateful::{Configs, Scraped};
     pub use crate::State;
 
     pub use anyhow::Result;
-    pub use headless_chrome::Tab;
+    pub use headless_chrome::{Browser, Tab};
 
     pub use std::collections::HashMap;
     pub use std::sync::Arc;
