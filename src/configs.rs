@@ -31,4 +31,13 @@ pub struct State {
 pub enum Scraped {
     Username(String),
     Email(String),
+    Social(Social),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum Social {
+    Twitch(String),
+    YouTube(String),
+    Twitter(String), // not X. :>
+    Other(String),
 }

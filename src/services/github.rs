@@ -30,6 +30,7 @@ impl Service for GitHub {
                 let socials = socials
                     .into_iter()
                     .filter_map(|v| v.get_attribute_value("href").ok().flatten())
+                    .map(|v| crate::resolver::link_to_social(&v))
                     .collect::<Vec<_>>();
 
                 println!("socials: {:?}", socials);

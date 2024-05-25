@@ -8,17 +8,17 @@
 #![allow(unused)]
 #![feature(try_blocks)]
 
-// use headless_chrome::protocol::cdp::Page;
 use headless_chrome::{Browser, LaunchOptionsBuilder};
 
 use crate::prelude::*;
 mod configs;
+mod resolver;
 mod services;
 
 pub use configs::{Configs, State};
 
 mod prelude {
-    pub use crate::configs::{Configs, Scraped};
+    pub use crate::configs::{Configs, Scraped, Social};
     pub use crate::services::Service;
     pub use crate::State;
 
