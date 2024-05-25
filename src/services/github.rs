@@ -23,8 +23,22 @@ impl Service for GitHub {
                 let email = email.get_content().unwrap();
                 println!("found email! {:?}", email);
             } else {
-                println!("no email found!");
+                println!("no email found! (probably requires login)");
             }
+
+            if let Ok(socials) = tab.find_elements("li[itemprop=social] > a") {
+                let socials = socials
+                    .into_iter()
+                    .filter_map(|v| v.get_attribute_value("href").ok().flatten())
+                    .collect::<Vec<_>>();
+
+                println!("socials: {:?}", socials);
+            } else {
+                println!("failed to get social links");
+            }
+
+            // debug
+            std::thread::sleep(std::time::Duration::from_secs(60));
         };
 
         res

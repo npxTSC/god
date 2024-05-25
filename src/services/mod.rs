@@ -22,6 +22,5 @@ pub fn scan_all(browser: &mut Browser, user: &str) -> HashMap<String, Vec<Scrape
     let mut res = HashMap::new();
 
     res.insert("GitHub".to_string(), github::GitHub::scan(browser, user));
-
     res
 }

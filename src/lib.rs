@@ -29,21 +29,7 @@ mod prelude {
     pub use std::sync::Arc;
 }
 
-pub fn _browse_wikipedia(conf: &Configs) -> Result<()> {
-    let browser = new_browser(conf)?;
-    let tab = browser.new_tab()?;
-
-    tab.navigate_to("https://www.wikipedia.org")?;
-    tab.wait_for_element("input#searchInput")?.click()?;
-    tab.type_str("WebKit")?.press_key("Enter")?;
-    tab.wait_for_element("#firstHeading")?;
-
-    assert!(tab.get_url().ends_with("WebKit"));
-
-    Ok(())
-}
-
-pub fn new_browser(conf: &Configs) -> Result<Browser> {
+fn new_browser(conf: &Configs) -> Result<Browser> {
     // launch options
     let mut lops = LaunchOptionsBuilder::default();
 
@@ -53,4 +39,19 @@ pub fn new_browser(conf: &Configs) -> Result<Browser> {
     let lops = lops.build()?;
 
     Browser::new(lops)
+}
+
+pub fn start_scan(conf: &Configs, passes: u8, user: &str) -> Result<Vec<Scraped>> {
+    let mut browser = new_browser(conf)?;
+
+    let users = vec![user];
+    let mut scans = HashMap::new();
+
+    for _ in 0..passes {
+        // TODO add new entries to
+        let new_scans = services::scan_all(&mut browser, user);
+        scans.extend(new_scans);
+    }
+
+    Ok(vec![])
 }

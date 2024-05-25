@@ -9,7 +9,7 @@ use god::{self, Configs};
 /// `god` is a CLI tool for accumulating online aliases...
 pub struct Args {
     /// the username to investigate
-    user: Option<String>,
+    user: String,
 
     /// path for a custom chromium binary
     #[arg(short, long)]
@@ -28,5 +28,5 @@ fn main() {
         headless: args.visible,
     };
 
-    let _browser = god::new_browser(&conf).unwrap();
+    let _browser = god::start_scan(&conf, 1, &args.user).unwrap();
 }
