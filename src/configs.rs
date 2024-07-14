@@ -18,6 +18,7 @@ pub struct Configs {
     pub headless: bool,
 }
 
+/// The state of the program.
 #[derive(Serialize, Deserialize)]
 pub struct State {
     /// the username of the current target...
@@ -27,17 +28,18 @@ pub struct State {
     pub accounts: HashMap<String, Vec<Scraped>>,
 }
 
+/// Information that has been scraped from a profile.
 #[derive(Serialize, Deserialize)]
 pub enum Scraped {
     Username(String),
     Email(String),
-    Social(Social),
+    Link(ProfileLink),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub enum Social {
+pub enum ProfileLink {
     Twitch(String),
     YouTube(String),
     Twitter(String), // not X. :>
-    Other(String),
+    Generic(String),
 }

@@ -1,7 +1,6 @@
 use std::path::PathBuf;
 
 use clap::Parser;
-use god::{self, Configs};
 
 #[derive(Parser, Debug)]
 #[command(arg_required_else_help(true))]
@@ -23,7 +22,7 @@ pub struct Args {
 fn main() {
     let args = Args::parse();
 
-    let conf = Configs {
+    let conf = god::Configs {
         chromium: args.chromium,
         headless: args.visible,
     };

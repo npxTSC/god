@@ -4,7 +4,7 @@ fn until_slash_or_question(frag: &str) -> &str {
     frag.split(&['/', '?'][..]).next().unwrap()
 }
 
-pub fn link_to_social(link: &str) -> Social {
+pub fn link_to_social(link: &str) -> ProfileLink {
     let original = link;
 
     // take off the http(s):// part
@@ -21,7 +21,7 @@ pub fn link_to_social(link: &str) -> Social {
     if link.starts_with("twitch.tv") {
         let link = until_slash_or_question(link.trim_start_matches("twitch.tv/"));
 
-        return Social::Twitch(link.to_string());
+        return ProfileLink::Twitch(link.to_string());
     }
 
     // youtube links are so diverse! we can disambiguate those later
@@ -30,13 +30,13 @@ pub fn link_to_social(link: &str) -> Social {
             .trim_start_matches("youtube.com/")
             .trim_start_matches("channel/")
             .trim_start_matches("@");
-        return Social::YouTube(link.to_string());
+        return ProfileLink::YouTube(link.to_string());
     }
 
     if link.starts_with("twitter.com") {
         let link = until_slash_or_question(link.trim_start_matches("twitter.com/"));
-        return Social::Twitter(link.to_string());
+        return ProfileLink::Twitter(link.to_string());
     }
 
-    Social::Other(original.to_string())
+    ProfileLink::Generic(original.to_string())
 }

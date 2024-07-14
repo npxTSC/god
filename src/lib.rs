@@ -18,9 +18,9 @@ mod services;
 pub use configs::{Configs, State};
 
 mod prelude {
-    pub use crate::configs::{Configs, Scraped, Social};
+    pub use crate::configs::State;
+    pub use crate::configs::{Configs, ProfileLink, Scraped};
     pub use crate::services::Service;
-    pub use crate::State;
 
     pub use anyhow::Result;
     pub use headless_chrome::{Browser, Tab};
