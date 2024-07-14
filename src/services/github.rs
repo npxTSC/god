@@ -13,7 +13,7 @@ impl Service for GitHub {
 
     fn scan(browser: &mut Browser, user: &str) -> Vec<Scraped> {
         let tab = browser.new_tab().unwrap();
-        let res = vec![];
+        let mut res = vec![];
 
         let _: Result<_> = try {
             tab.navigate_to(&format!("https://github.com/{}", user))?;
@@ -36,6 +36,17 @@ impl Service for GitHub {
                 println!("socials: {:?}", socials);
             } else {
                 println!("failed to get social links");
+            }
+
+            if let Ok(link) = tab.find_element(".Link--primary") {
+                if let Some(link) = link.get_attribute_value("href")? {
+                    println!("found profile website link! {:?}", link);
+                    res.push(Scraped::Link(ProfileLink::Generic(link)));
+                } else {
+                    println!("link found, but no href");
+                }
+            } else {
+                println!("no link found!");
             }
 
             // debug
