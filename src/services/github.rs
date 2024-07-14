@@ -3,15 +3,15 @@ use crate::prelude::*;
 pub struct GitHub;
 
 impl Service for GitHub {
-    fn srv_name() -> &'static str {
+    fn srv_name(&self) -> &'static str {
         "GitHub"
     }
 
-    fn username_exists(tab: Arc<Tab>, user: &str) -> bool {
+    fn username_exists(&self, tab: Arc<Tab>, user: &str) -> bool {
         todo!()
     }
 
-    fn scan(browser: &mut Browser, user: &str) -> Vec<Scraped> {
+    fn scan(&self, browser: &mut Browser, user: &str) -> Vec<Scraped> {
         let tab = browser.new_tab().unwrap();
         let mut res = vec![];
 
@@ -48,9 +48,6 @@ impl Service for GitHub {
             } else {
                 println!("no link found!");
             }
-
-            // debug
-            std::thread::sleep(std::time::Duration::from_secs(60));
         };
 
         res
@@ -75,7 +72,7 @@ mod tests {
             headless: true,
         })?;
 
-        let aliases = GitHub::scan(&mut browser, "ThePrimeagen");
+        let aliases = GitHub.scan(&mut browser, "ThePrimeagen");
 
         // TODO should find `ThePrimeTimeagen` (youtube link)
 

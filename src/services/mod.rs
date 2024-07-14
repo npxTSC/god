@@ -12,20 +12,25 @@ pub mod youtube;
 
 /// Represents a scraper for a specific service.
 pub trait Service {
-    fn srv_name() -> &'static str;
+    fn srv_name(&self) -> &'static str;
 
-    fn username_exists(tab: Arc<Tab>, user: &str) -> bool;
+    fn username_exists(&self, tab: Arc<Tab>, user: &str) -> bool;
 
-    fn scan(tab: &mut Browser, user: &str) -> Vec<Scraped>;
+    fn scan(&self, tab: &mut Browser, user: &str) -> Vec<Scraped>;
 }
 
 /// Scan all services for a username.
 pub fn scan_all(browser: &mut Browser, user: &str) -> HashMap<String, Vec<Scraped>> {
-    let mut res = HashMap::new();
+    let services: Vec<Box<dyn Service>> =
+        vec![Box::new(github::GitHub), Box::new(youtube::YouTube)];
 
-    // this is kinda a hack lol refactor later when there are more services
-    res.insert("GitHub".to_string(), github::GitHub::scan(browser, user));
-    res.insert("YouTube".to_string(), youtube::YouTube::scan(browser, user));
+    let res = services
+        .into_iter()
+        .map(|srv| (srv.srv_name().to_string(), srv.scan(browser, user)))
+        .collect();
+
+    // debugging purposes
+    std::thread::sleep(std::time::Duration::from_secs(60));
 
     // TODO compare the results and see which services have the most links in common
 
