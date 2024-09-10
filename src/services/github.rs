@@ -1,3 +1,5 @@
+use std::sync::Mutex;
+
 use crate::prelude::*;
 
 const REPO_LINKS_TO_FOLLOW: usize = 10;
@@ -57,9 +59,11 @@ fn find_socials(tab: &Arc<Tab>, _res: &mut [Scraped]) {
 fn find_emails_from_patches(
     tab: &Tab,
     res: &mut Vec<Scraped>,
+    browser: &mut Browser,
     user: &str,
 ) -> Result<()> {
     println!("searching for emails from patches...");
+    println!("warning: merge commits may show the wrong person's address! manually verify.");
 
     let repo_links = tab
         .wait_for_elements("a[itemprop=\"name codeRepository\"]")
@@ -74,58 +78,85 @@ fn find_emails_from_patches(
         .take(REPO_LINKS_TO_FOLLOW)
         .collect::<Vec<_>>();
 
+    let mut handles = vec![];
+    let scraped = Arc::new(Mutex::new(vec![]));
+
     for repo in repo_links {
-        println!("searching for emails from patches in repo {}", repo);
+        let tab = browser.new_tab().unwrap();
+        let user = user.to_owned();
+        let scraped2 = scraped.clone();
+        handles.push(std::thread::spawn(move || {
+            scrape_one_repo(repo, &tab, &user, scraped2).unwrap();
+        }));
+    }
 
-        tab.navigate_to(&format!(
-            "https://github.com/{}/{}/commits?author={}",
-            user, repo, user
-        ))?
-        .wait_until_navigated()?;
+    for handle in handles {
+        handle.join().unwrap();
+    }
 
-        let Ok(commit_links) = tab.wait_for_elements(&format!(
-            "a[href^=\"/{}/{}/commit/\"]",
-            user, repo
-        )) else {
-            println!("no commits found for repo {}", repo);
-            continue;
-        };
+    res.extend(scraped.lock().unwrap().drain(..));
 
-        let commit_links = commit_links
-            .into_iter()
-            .map(|v| v.get_attribute_value("href").unwrap().unwrap())
-            .collect::<Vec<_>>();
+    Ok(())
+}
 
-        for href in commit_links {
-            let patch = reqwest::blocking::get(&format!(
-                "https://github.com{}.patch",
-                href
-            ))?
-            .text()?;
+fn scrape_one_repo(
+    repo: String,
+    tab: &Tab,
+    user: &str,
+    res: Arc<Mutex<Vec<Scraped>>>,
+) -> Result<(), anyhow::Error> {
+    println!("searching for emails from patches in repo {}", repo);
+    tab.navigate_to(&format!(
+        "https://github.com/{}/{}/commits?author={}",
+        user, repo, user
+    ))?
+    .wait_until_navigated()?;
+    let Ok(commit_links) = tab
+        .wait_for_elements(&format!("a[href^=\"/{}/{}/commit/\"]", user, repo))
+    else {
+        println!("no commits found for repo {}", repo);
+        return Ok(());
+    };
 
-            let email = patch
-                .lines()
-                .find(|v| v.starts_with("From: "))
-                .map(|v| v.trim_start_matches("From: ").to_owned())
-                .map(|v| parse_between_angle_brackets(&v).unwrap().to_owned());
+    let commit_links = commit_links
+        .into_iter()
+        .map(|v| v.get_attribute_value("href").unwrap().unwrap())
+        .collect::<Vec<_>>();
 
-            if let Some(email) = email {
-                // don't push res if it's already there
-                if !res
-                    .iter()
-                    .any(|v| matches!(v, Scraped::Email(e) if e == &email))
-                {
-                    println!(
-                        "found new email from {} patch: {:?}",
-                        repo, email
-                    );
-                    res.push(Scraped::Email(email));
-                }
-            }
-        }
+    for href in commit_links {
+        scrape_patchfile(href, res.clone(), &repo)?;
     }
 
     Ok(())
+}
+
+fn scrape_patchfile(
+    href: String,
+    res: Arc<Mutex<Vec<Scraped>>>,
+    repo: &String,
+) -> Result<(), anyhow::Error> {
+    let patch =
+        reqwest::blocking::get(&format!("https://github.com{}.patch", href))?
+            .text()?;
+
+    let email = patch
+        .lines()
+        .find(|v| v.starts_with("From: "))
+        .map(|v| v.trim_start_matches("From: ").to_owned())
+        .map(|v| parse_between_angle_brackets(&v).unwrap().to_owned());
+    Ok(if let Some(email) = email {
+        // don't push res if it's already there
+        if !res
+            .lock()
+            .unwrap()
+            .iter()
+            .any(|v| matches!(v, Scraped::Email(e) if e == &email))
+        {
+            println!("found new email from {} patch: {:?}", repo, email);
+            println!("\\- patch: {}", href);
+            res.lock().unwrap().push(Scraped::Email(email));
+        }
+    })
 }
 
 pub struct GitHub;
@@ -156,7 +187,8 @@ impl Service for GitHub {
                 user
             ))?
             .wait_until_navigated()?;
-            find_emails_from_patches(&tab, &mut res, user)?;
+
+            find_emails_from_patches(&tab, &mut res, browser, user)?;
 
             // debug
             // std::thread::sleep(std::time::Duration::from_secs(60));
