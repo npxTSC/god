@@ -1,5 +1,18 @@
 use crate::prelude::*;
 
+const REPO_LINKS_TO_FOLLOW: usize = 10;
+
+fn parse_between_angle_brackets(input: &str) -> Option<&str> {
+    let start = input.find("&lt;")?;
+    let end = input.find("&gt;")?;
+
+    if start < end {
+        Some(&input[start + 4..end])
+    } else {
+        None
+    }
+}
+
 fn find_email(tab: &Arc<Tab>, res: &mut Vec<Scraped>) {
     if let Ok(email) = tab.find_element("[itemprop=email]") {
         let email = email.get_content().unwrap();
@@ -43,8 +56,8 @@ fn find_socials(tab: &Arc<Tab>, _res: &mut [Scraped]) {
 
 fn find_emails_from_patches(
     tab: &Tab,
-    _res: &mut [Scraped],
-    _user: &str,
+    res: &mut Vec<Scraped>,
+    user: &str,
 ) -> Result<()> {
     println!("searching for emails from patches...");
 
@@ -52,27 +65,63 @@ fn find_emails_from_patches(
         .wait_for_elements("a[itemprop=\"name codeRepository\"]")
         .unwrap();
 
-    // filter any that are from forked repos, since they
-    // likely won't contain commits from the user
     let repo_links = repo_links
         .into_iter()
-        .filter(|v| {
-            let is_own = v.find_element_by_xpath("../span").is_err();
-            if !is_own {
-                println!(
-                    "skipping forked repo: {:?}",
-                    v.get_attribute_value("href")
-                );
-            }
-
-            is_own
-        })
+        // TODO skip forks
         .filter_map(|v| v.get_attribute_value("href").unwrap())
         .map(|v| v.split('/').last().unwrap().to_owned())
-        .inspect(|v| println!("found own repo link: {:?}", v))
+        .inspect(|v| println!("found repo link: {:?}", v))
+        .take(REPO_LINKS_TO_FOLLOW)
         .collect::<Vec<_>>();
 
-    println!("found {} own repos", repo_links.len());
+    for repo in repo_links {
+        println!("searching for emails from patches in repo {}", repo);
+
+        tab.navigate_to(&format!(
+            "https://github.com/{}/{}/commits?author={}",
+            user, repo, user
+        ))?
+        .wait_until_navigated()?;
+
+        let Ok(commit_links) = tab.wait_for_elements(&format!(
+            "a[href^=\"/{}/{}/commit/\"]",
+            user, repo
+        )) else {
+            println!("no commits found for repo {}", repo);
+            continue;
+        };
+
+        let commit_links = commit_links
+            .into_iter()
+            .map(|v| v.get_attribute_value("href").unwrap().unwrap())
+            .collect::<Vec<_>>();
+
+        for href in commit_links {
+            tab.navigate_to(&format!("https://github.com{}.patch", href))?
+                .wait_until_navigated()?;
+
+            let patch = tab.get_content().unwrap();
+            let email = patch
+                .lines()
+                .find(|v| v.starts_with("From: "))
+                .map(|v| v.trim_start_matches("From: ").to_owned())
+                .map(|v| parse_between_angle_brackets(&v).unwrap().to_owned());
+
+            if let Some(email) = email {
+                // don't push res if it's already there
+                if !res
+                    .iter()
+                    .any(|v| matches!(v, Scraped::Email(e) if e == &email))
+                {
+                    println!(
+                        "found new email from {} patch: {:?}",
+                        repo, email
+                    );
+                    res.push(Scraped::Email(email));
+                }
+            }
+        }
+    }
 
     Ok(())
 }
@@ -133,7 +182,7 @@ mod tests {
             headless: true,
         })?;
 
-        let aliases = GitHub::scan(&mut browser, "ThePrimeagen");
+        let _aliases = GitHub::scan(&mut browser, "ThePrimeagen");
 
         // TODO should find `ThePrimeTimeagen` (youtube link)
 
