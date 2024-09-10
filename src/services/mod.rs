@@ -5,15 +5,15 @@
 
 /// submodules for each service will prob use these
 use crate::prelude::*;
-use serde::{Deserialize, Serialize};
+// use serde::{Deserialize, Serialize};
 
 pub mod github;
 
 /// Represents a scraper for a specific service.
 pub trait Service {
-    fn srv_name() -> &'static str;
+    // fn srv_name() -> &'static str;
 
-    fn username_exists(tab: Arc<Tab>, user: &str) -> bool;
+    // fn username_exists(tab: Arc<Tab>, user: &str) -> bool;
 
     fn scan(tab: &mut Browser, user: &str) -> Vec<Scraped>;
 }

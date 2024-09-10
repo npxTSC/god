@@ -1,15 +1,60 @@
 use crate::prelude::*;
 
+fn find_email(tab: &Arc<Tab>, res: &mut Vec<Scraped>) {
+    if let Ok(email) = tab.find_element("[itemprop=email]") {
+        let email = email.get_content().unwrap();
+        println!("found email! {:?}", email);
+
+        res.push(Scraped::Email(email));
+    } else {
+        println!("no email found! (probably requires login)");
+    }
+}
+
+fn find_website_links(tab: &Tab, res: &mut Vec<Scraped>) -> Result<()> {
+    if let Ok(link) = tab.find_element(".Link--primary") {
+        if let Some(link) = link.get_attribute_value("href")? {
+            println!("found profile website link! {:?}", link);
+            res.push(Scraped::Link(ProfileLink::Generic(link)));
+        } else {
+            println!("link found, but no href");
+        }
+    } else {
+        println!("no link found!");
+    }
+
+    Ok(())
+}
+
+fn find_socials(tab: &Arc<Tab>, _res: &mut Vec<Scraped>) {
+    if let Ok(socials) = tab.find_elements("li[itemprop=social] > a") {
+        let socials = socials
+            .into_iter()
+            .filter_map(|v| v.get_attribute_value("href").ok().flatten())
+            .map(|v| crate::resolver::link_to_social(&v))
+            .collect::<Vec<_>>();
+
+        println!("socials: {:?}", socials);
+        // TODO push res
+    } else {
+        println!("failed to get social links");
+    }
+}
+
+fn find_emails_from_patches(tab: &Tab, res: &mut Vec<Scraped>) -> Result<()> {
+    Ok(())
+}
+
 pub struct GitHub;
 
 impl Service for GitHub {
-    fn srv_name() -> &'static str {
-        "GitHub"
-    }
-
-    fn username_exists(tab: Arc<Tab>, user: &str) -> bool {
-        todo!()
-    }
+    // fn srv_name() -> &'static str {
+    //     "GitHub"
+    // }
+    //
+    // fn username_exists(tab: Arc<Tab>, user: &str) -> bool {
+    //     todo!()
+    // }
 
     fn scan(browser: &mut Browser, user: &str) -> Vec<Scraped> {
         let tab = browser.new_tab().unwrap();
@@ -17,37 +62,12 @@ impl Service for GitHub {
 
         let _: Result<_> = try {
             tab.navigate_to(&format!("https://github.com/{}", user))?;
-            tab.wait_until_navigated();
+            tab.wait_until_navigated()?;
 
-            if let Ok(email) = tab.find_element("[itemprop=email]") {
-                let email = email.get_content().unwrap();
-                println!("found email! {:?}", email);
-            } else {
-                println!("no email found! (probably requires login)");
-            }
-
-            if let Ok(socials) = tab.find_elements("li[itemprop=social] > a") {
-                let socials = socials
-                    .into_iter()
-                    .filter_map(|v| v.get_attribute_value("href").ok().flatten())
-                    .map(|v| crate::resolver::link_to_social(&v))
-                    .collect::<Vec<_>>();
-
-                println!("socials: {:?}", socials);
-            } else {
-                println!("failed to get social links");
-            }
-
-            if let Ok(link) = tab.find_element(".Link--primary") {
-                if let Some(link) = link.get_attribute_value("href")? {
-                    println!("found profile website link! {:?}", link);
-                    res.push(Scraped::Link(ProfileLink::Generic(link)));
-                } else {
-                    println!("link found, but no href");
-                }
-            } else {
-                println!("no link found!");
-            }
+            find_email(&tab, &mut res);
+            find_socials(&tab, &mut res);
+            find_website_links(&tab, &mut res)?;
+            find_emails_from_patches(&tab, &mut res)?;
 
             // debug
             std::thread::sleep(std::time::Duration::from_secs(60));

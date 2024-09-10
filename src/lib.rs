@@ -5,7 +5,6 @@
 //! \- &Cherry, 2/7/2024
 //!
 
-#![allow(unused)]
 #![feature(try_blocks)]
 
 use headless_chrome::{Browser, LaunchOptionsBuilder};
@@ -17,6 +16,7 @@ mod services;
 
 pub use configs::{Configs, State};
 
+#[allow(unused)]
 mod prelude {
     pub use crate::configs::State;
     pub use crate::configs::{Configs, ProfileLink, Scraped};
@@ -44,7 +44,7 @@ fn new_browser(conf: &Configs) -> Result<Browser> {
 pub fn start_scan(conf: &Configs, passes: u8, user: &str) -> Result<Vec<Scraped>> {
     let mut browser = new_browser(conf)?;
 
-    let users = vec![user];
+    let _users = vec![user];
     let mut scans = HashMap::new();
 
     for _ in 0..passes {
