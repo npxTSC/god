@@ -26,7 +26,7 @@ fn find_website_links(tab: &Tab, res: &mut Vec<Scraped>) -> Result<()> {
     Ok(())
 }
 
-fn find_socials(tab: &Arc<Tab>, _res: &mut Vec<Scraped>) {
+fn find_socials(tab: &Arc<Tab>, _res: &mut [Scraped]) {
     if let Ok(socials) = tab.find_elements("li[itemprop=social] > a") {
         let socials = socials
             .into_iter()
@@ -41,7 +41,39 @@ fn find_socials(tab: &Arc<Tab>, _res: &mut Vec<Scraped>) {
     }
 }
 
-fn find_emails_from_patches(tab: &Tab, res: &mut Vec<Scraped>) -> Result<()> {
+fn find_emails_from_patches(
+    tab: &Tab,
+    _res: &mut [Scraped],
+    _user: &str,
+) -> Result<()> {
+    println!("searching for emails from patches...");
+
+    let repo_links = tab
+        .wait_for_elements("a[itemprop=\"name codeRepository\"]")
+        .unwrap();
+
+    // filter any that are from forked repos, since they
+    // likely won't contain commits from the user
+    let repo_links = repo_links
+        .into_iter()
+        .filter(|v| {
+            let is_own = v.find_element_by_xpath("../span").is_err();
+            if !is_own {
+                println!(
+                    "skipping forked repo: {:?}",
+                    v.get_attribute_value("href")
+                );
+            }
+
+            is_own
+        })
+        .filter_map(|v| v.get_attribute_value("href").unwrap())
+        .map(|v| v.split('/').last().unwrap().to_owned())
+        .inspect(|v| println!("found own repo link: {:?}", v))
+        .collect::<Vec<_>>();
+
+    println!("found {} own repos", repo_links.len());
+
     Ok(())
 }
 
@@ -61,16 +93,22 @@ impl Service for GitHub {
         let mut res = vec![];
 
         let _: Result<_> = try {
-            tab.navigate_to(&format!("https://github.com/{}", user))?;
-            tab.wait_until_navigated()?;
+            tab.navigate_to(&format!("https://github.com/{}", user))?
+                .wait_until_navigated()?;
 
             find_email(&tab, &mut res);
             find_socials(&tab, &mut res);
             find_website_links(&tab, &mut res)?;
-            find_emails_from_patches(&tab, &mut res)?;
+
+            tab.navigate_to(&format!(
+                "https://github.com/{}?tab=repositories",
+                user
+            ))?
+            .wait_until_navigated()?;
+            find_emails_from_patches(&tab, &mut res, user)?;
 
             // debug
-            std::thread::sleep(std::time::Duration::from_secs(60));
+            // std::thread::sleep(std::time::Duration::from_secs(60));
         };
 
         res

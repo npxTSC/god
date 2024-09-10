@@ -1,13 +1,9 @@
 use std::collections::HashMap;
-use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
-use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::services::Service;
-
-const DATAFILE_NAME: &str = ".god-data";
+// const DATAFILE_NAME: &str = ".god-data";
 
 #[derive(Default, Serialize, Deserialize)]
 pub struct Configs {

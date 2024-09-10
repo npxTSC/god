@@ -18,8 +18,7 @@ pub use configs::{Configs, State};
 
 #[allow(unused)]
 mod prelude {
-    pub use crate::configs::State;
-    pub use crate::configs::{Configs, ProfileLink, Scraped};
+    pub use crate::configs::{Configs, ProfileLink, Scraped, State};
     pub use crate::services::Service;
 
     pub use anyhow::Result;
@@ -41,10 +40,14 @@ fn new_browser(conf: &Configs) -> Result<Browser> {
     Browser::new(lops)
 }
 
-pub fn start_scan(conf: &Configs, passes: u8, user: &str) -> Result<Vec<Scraped>> {
+pub fn start_scan(
+    conf: &Configs,
+    passes: u8,
+    user: &str,
+) -> Result<Vec<Scraped>> {
     let mut browser = new_browser(conf)?;
 
-    let _users = vec![user];
+    let _users = [user];
     let mut scans = HashMap::new();
 
     for _ in 0..passes {
