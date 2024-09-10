@@ -3,11 +3,11 @@ use crate::prelude::*;
 const REPO_LINKS_TO_FOLLOW: usize = 10;
 
 fn parse_between_angle_brackets(input: &str) -> Option<&str> {
-    let start = input.find("&lt;")?;
-    let end = input.find("&gt;")?;
+    let start = input.find("<")?;
+    let end = input.find(">")?;
 
     if start < end {
-        Some(&input[start + 4..end])
+        Some(&input[start + 1..end])
     } else {
         None
     }
@@ -97,10 +97,12 @@ fn find_emails_from_patches(
             .collect::<Vec<_>>();
 
         for href in commit_links {
-            tab.navigate_to(&format!("https://github.com{}.patch", href))?
-                .wait_until_navigated()?;
+            let patch = reqwest::blocking::get(&format!(
+                "https://github.com{}.patch",
+                href
+            ))?
+            .text()?;
 
-            let patch = tab.get_content().unwrap();
             let email = patch
                 .lines()
                 .find(|v| v.starts_with("From: "))
